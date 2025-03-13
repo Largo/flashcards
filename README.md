@@ -5,7 +5,6 @@ A full-stack flashcard application built with C# Web API, Entity Framework Core,
 ## Features
 
 - Create, read, update, and delete flashcards
-- Organize flashcards into categories
 - Study flashcards using the SM-2 spaced repetition algorithm
 - Track progress and review history
 - Responsive UI for desktop and mobile devices
@@ -87,7 +86,7 @@ This application implements the SM-2 algorithm for spaced repetition, which work
    dotnet run
    ```
 
-3. The API will be available at `https://localhost:5001/api`
+3. The API will be available at `http://localhost:5046/api`
 
 ### Frontend
 
@@ -106,7 +105,7 @@ This application implements the SM-2 algorithm for spaced repetition, which work
    npm run dev
    ```
 
-4. The frontend will be available at `http://localhost:5173`
+4. The frontend will be available at `http://localhost:5173` (or another port if 5173 is in use)
 
 ## Database
 

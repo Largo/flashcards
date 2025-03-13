@@ -16,9 +16,6 @@ namespace FlashcardApi.Models
         
         public string? Hint { get; set; }
         
-        public int CategoryId { get; set; }
-        public Category Category { get; set; }
-        
         // Spaced Repetition Algorithm properties
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime LastReviewedAt { get; set; } = DateTime.UtcNow;

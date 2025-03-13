@@ -1,74 +1,81 @@
 <template>
-  <div class="home">
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="jumbotron bg-light p-5 rounded">
-          <h1 class="display-4">Welcome to Flashcard App</h1>
-          <p class="lead">Improve your learning with spaced repetition</p>
-          <hr class="my-4">
-          <p>This application uses the SM-2 spaced repetition algorithm to help you remember information more effectively.</p>
-          <div class="d-flex gap-2">
-            <router-link to="/study" class="btn btn-primary btn-lg">Start Studying</router-link>
-            <router-link to="/flashcards/new" class="btn btn-success btn-lg">Create Flashcard</router-link>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mb-4">
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Due for Review</h5>
-            <p class="card-text">You have {{ dueCount }} flashcards due for review.</p>
-            <router-link to="/study" class="btn btn-primary">Study Now</router-link>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Total Flashcards</h5>
-            <p class="card-text">You have created {{ totalCount }} flashcards in total.</p>
-            <router-link to="/flashcards" class="btn btn-primary">View All</router-link>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4 mb-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Categories</h5>
-            <p class="card-text">Organize your flashcards into {{ categoryCount }} categories.</p>
-            <router-link to="/categories" class="btn btn-primary">Manage Categories</router-link>
-          </div>
-        </div>
+  <div class="home-view">
+    <div class="jumbotron bg-light p-5 rounded mb-4">
+      <h1 class="display-4">Welcome to Flashcard App</h1>
+      <p class="lead">
+        A spaced repetition system to help you memorize and retain information more effectively.
+      </p>
+      <hr class="my-4">
+      <p>
+        Get started by creating flashcards and studying them using the scientifically-proven spaced repetition algorithm.
+      </p>
+      <div class="d-flex gap-2">
+        <router-link to="/flashcards" class="btn btn-primary">
+          View All Flashcards
+        </router-link>
+        <router-link to="/study" class="btn btn-success">
+          Start Studying
+        </router-link>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-12">
-        <h2>Recently Added Flashcards</h2>
-        <div v-if="loading" class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-        <div v-else-if="recentFlashcards.length === 0" class="alert alert-info">
-          You haven't created any flashcards yet. <router-link to="/flashcards/new">Create your first flashcard</router-link>.
-        </div>
-        <div v-else class="row">
-          <div v-for="flashcard in recentFlashcards" :key="flashcard.id" class="col-md-4 mb-3">
-            <div class="card h-100">
-              <div class="card-body">
-                <h5 class="card-title">{{ truncateText(flashcard.question, 50) }}</h5>
-                <p class="card-text text-muted">{{ flashcard.category.name }}</p>
-              </div>
-              <div class="card-footer bg-transparent">
-                <router-link :to="`/flashcards/${flashcard.id}`" class="btn btn-sm btn-primary">View</router-link>
-              </div>
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-card-list me-2"></i>Flashcards
+            </h5>
+            <p class="card-text">
+              Create and manage your flashcards. Add questions, answers, and hints to help you study.
+            </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <router-link to="/flashcards" class="btn btn-outline-primary">
+                Manage Flashcards
+              </router-link>
+              <span class="badge bg-primary rounded-pill">{{ stats.totalFlashcards }}</span>
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">
+              <i class="bi bi-lightning me-2"></i>Study Session
+            </h5>
+            <p class="card-text">
+              Review flashcards that are due for review based on the spaced repetition algorithm.
+            </p>
+            <div class="d-flex justify-content-between align-items-center">
+              <router-link to="/study" class="btn btn-outline-success">
+                Start Studying
+              </router-link>
+              <span class="badge bg-success rounded-pill">{{ stats.dueFlashcards }} due</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">How Spaced Repetition Works</h5>
+      </div>
+      <div class="card-body">
+        <p>
+          This app uses the SM-2 spaced repetition algorithm to optimize your learning:
+        </p>
+        <ol>
+          <li>After reviewing a flashcard, rate your recall quality from 0-5</li>
+          <li>Cards you find difficult will appear more frequently</li>
+          <li>Cards you know well will appear less often</li>
+          <li>The system automatically schedules the optimal time for your next review</li>
+        </ol>
+        <p class="mb-0">
+          This scientifically-proven method helps you focus on what you need to learn most while reinforcing your knowledge at the optimal intervals.
+        </p>
       </div>
     </div>
   </div>
@@ -81,42 +88,28 @@ export default {
   name: 'HomeView',
   data() {
     return {
-      loading: true,
-      dueCount: 0,
-      totalCount: 0,
-      categoryCount: 0,
-      recentFlashcards: []
+      stats: {
+        totalFlashcards: 0,
+        dueFlashcards: 0
+      }
     }
   },
   async created() {
-    try {
-      // Get all flashcards
-      const flashcardsResponse = await api.getFlashcards();
-      this.totalCount = flashcardsResponse.data.length;
-      
-      // Get due flashcards
-      const dueFlashcardsResponse = await api.getDueFlashcards();
-      this.dueCount = dueFlashcardsResponse.data.length;
-      
-      // Get categories
-      const categoriesResponse = await api.getCategories();
-      this.categoryCount = categoriesResponse.data.length;
-      
-      // Get recent flashcards (last 3)
-      this.recentFlashcards = flashcardsResponse.data
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 3);
-      
-      this.loading = false;
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      this.loading = false;
-    }
+    await this.loadStats();
   },
   methods: {
-    truncateText(text, maxLength) {
-      if (text.length <= maxLength) return text;
-      return text.slice(0, maxLength) + '...';
+    async loadStats() {
+      try {
+        // Get all flashcards to count total
+        const flashcardsResponse = await api.getFlashcards();
+        this.stats.totalFlashcards = flashcardsResponse.data.length;
+        
+        // Get due flashcards
+        const dueFlashcardsResponse = await api.getDueFlashcards();
+        this.stats.dueFlashcards = dueFlashcardsResponse.data.length;
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
     }
   }
 }

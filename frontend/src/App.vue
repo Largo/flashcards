@@ -17,9 +17,6 @@
             <li class="nav-item">
               <router-link class="nav-link" to="/study">Study</router-link>
             </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/categories">Categories</router-link>
-            </li>
           </ul>
         </div>
       </div>

@@ -9,51 +9,37 @@
     </div>
     
     <form v-else @submit.prevent="saveFlashcard">
-      <div class="card mb-4">
-        <div class="card-body">
-          <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select id="category" class="form-select" v-model="flashcard.categoryId" required>
-              <option value="" disabled>Select a category</option>
-              <option v-for="category in categories" :key="category.id" :value="category.id">
-                {{ category.name }}
-              </option>
-            </select>
-          </div>
-          
-          <div class="mb-3">
-            <label for="question" class="form-label">Question</label>
-            <textarea 
-              id="question" 
-              class="form-control" 
-              v-model="flashcard.question" 
-              rows="3" 
-              required
-            ></textarea>
-          </div>
-          
-          <div class="mb-3">
-            <label for="answer" class="form-label">Answer</label>
-            <textarea 
-              id="answer" 
-              class="form-control" 
-              v-model="flashcard.answer" 
-              rows="3" 
-              required
-            ></textarea>
-          </div>
-          
-          <div class="mb-3">
-            <label for="hint" class="form-label">Hint (Optional)</label>
-            <textarea 
-              id="hint" 
-              class="form-control" 
-              v-model="flashcard.hint" 
-              rows="2"
-            ></textarea>
-            <div class="form-text">Provide a hint that can help you remember the answer.</div>
-          </div>
-        </div>
+      <div class="mb-3">
+        <label for="question" class="form-label">Question</label>
+        <textarea 
+          class="form-control" 
+          id="question" 
+          v-model="flashcard.question" 
+          rows="3" 
+          required
+        ></textarea>
+      </div>
+      
+      <div class="mb-3">
+        <label for="answer" class="form-label">Answer</label>
+        <textarea 
+          class="form-control" 
+          id="answer" 
+          v-model="flashcard.answer" 
+          rows="3" 
+          required
+        ></textarea>
+      </div>
+      
+      <div class="mb-3">
+        <label for="hint" class="form-label">Hint (Optional)</label>
+        <textarea 
+          class="form-control" 
+          id="hint" 
+          v-model="flashcard.hint" 
+          rows="2"
+        ></textarea>
+        <div class="form-text">Provide a hint that can help you remember the answer.</div>
       </div>
       
       <div class="d-flex justify-content-between">
@@ -83,10 +69,8 @@ export default {
       flashcard: {
         question: '',
         answer: '',
-        hint: '',
-        categoryId: ''
+        hint: ''
       },
-      categories: [],
       loading: true,
       saving: false
     }
@@ -97,31 +81,24 @@ export default {
     }
   },
   async created() {
-    try {
-      // Load categories
-      const categoriesResponse = await api.getCategories();
-      this.categories = categoriesResponse.data;
-      
-      // If editing, load the flashcard data
-      if (this.isEditing) {
-        const flashcardResponse = await api.getFlashcard(this.id);
-        const flashcard = flashcardResponse.data;
-        
-        this.flashcard = {
-          question: flashcard.question,
-          answer: flashcard.answer,
-          hint: flashcard.hint || '',
-          categoryId: flashcard.categoryId
-        };
-      }
-      
-      this.loading = false;
-    } catch (error) {
-      console.error('Error loading form data:', error);
-      this.loading = false;
+    if (this.isEditing) {
+      await this.loadFlashcard();
     }
+    this.loading = false;
   },
   methods: {
+    async loadFlashcard() {
+      try {
+        const response = await api.getFlashcard(this.id);
+        this.flashcard = {
+          question: response.data.question,
+          answer: response.data.answer,
+          hint: response.data.hint || ''
+        };
+      } catch (error) {
+        console.error('Error loading flashcard:', error);
+      }
+    },
     async saveFlashcard() {
       try {
         this.saving = true;
@@ -132,7 +109,6 @@ export default {
           await api.createFlashcard(this.flashcard);
         }
         
-        // Navigate back to flashcards list
         this.$router.push('/flashcards');
       } catch (error) {
         console.error('Error saving flashcard:', error);

@@ -21,7 +21,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVueApp", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") // Vue.js dev server default port
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175") // Vue.js dev server ports
               .AllowAnyHeader()
               .AllowAnyMethod();
     });

@@ -27,9 +27,7 @@ namespace FlashcardApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Flashcard>>> GetFlashcards()
         {
-            return await _context.Flashcards
-                .Include(f => f.Category)
-                .ToListAsync();
+            return await _context.Flashcards.ToListAsync();
         }
 
         // GET: api/Flashcards/5
@@ -37,7 +35,6 @@ namespace FlashcardApi.Controllers
         public async Task<ActionResult<Flashcard>> GetFlashcard(int id)
         {
             var flashcard = await _context.Flashcards
-                .Include(f => f.Category)
                 .FirstOrDefaultAsync(f => f.Id == id);
 
             if (flashcard == null)
@@ -54,7 +51,6 @@ namespace FlashcardApi.Controllers
         {
             var now = DateTime.UtcNow;
             var dueFlashcards = await _context.Flashcards
-                .Include(f => f.Category)
                 .Where(f => f.NextReviewAt <= now)
                 .ToListAsync();
 

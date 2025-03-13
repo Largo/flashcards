@@ -34,7 +34,7 @@
       
       <div v-if="currentFlashcard" class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="badge bg-primary">{{ currentFlashcard.category.name }}</span>
+          <span class="badge bg-primary">Next Review: {{ formatDate(currentFlashcard.nextReviewAt) }}</span>
           <span>Card {{ currentIndex + 1 }} of {{ dueFlashcards.length }}</span>
         </div>
         <div class="card-body">
