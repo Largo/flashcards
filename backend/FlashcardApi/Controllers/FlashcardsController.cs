@@ -77,14 +77,24 @@ namespace FlashcardApi.Controllers
 
         // PUT: api/Flashcards/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFlashcard(int id, Flashcard flashcard)
+        public async Task<IActionResult> UpdateFlashcard(int id, Flashcard flashcardUpdate)
         {
-            if (id != flashcard.Id)
+            if (id != flashcardUpdate.Id && flashcardUpdate.Id != 0)
             {
                 return BadRequest();
             }
 
-            _context.Entry(flashcard).State = EntityState.Modified;
+            // Get the existing flashcard
+            var existingFlashcard = await _context.Flashcards.FindAsync(id);
+            if (existingFlashcard == null)
+            {
+                return NotFound();
+            }
+
+            // Update only the fields that can be modified by the user
+            existingFlashcard.Question = flashcardUpdate.Question;
+            existingFlashcard.Answer = flashcardUpdate.Answer;
+            existingFlashcard.Hint = flashcardUpdate.Hint;
 
             try
             {

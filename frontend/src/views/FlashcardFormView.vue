@@ -43,18 +43,61 @@
       </div>
       
       <div class="d-flex justify-content-between">
-        <router-link to="/flashcards" class="btn btn-secondary">Cancel</router-link>
+        <div>
+          <router-link to="/flashcards" class="btn btn-secondary me-2">
+            <i class="bi bi-arrow-left me-1"></i> Cancel
+          </router-link>
+          <button 
+            v-if="isEditing" 
+            type="button" 
+            class="btn btn-danger" 
+            @click="confirmDelete"
+            :disabled="saving"
+          >
+            <i class="bi bi-trash me-1"></i> Delete
+          </button>
+        </div>
         <button type="submit" class="btn btn-primary" :disabled="saving">
           <span v-if="saving" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          <i v-else class="bi" :class="isEditing ? 'bi-save' : 'bi-plus-circle'"></i>
           {{ isEditing ? 'Update Flashcard' : 'Create Flashcard' }}
         </button>
       </div>
     </form>
+    
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true" ref="deleteModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Delete</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this flashcard?</p>
+            <div class="card">
+              <div class="card-body">
+                <p><strong>Question:</strong> {{ flashcard.question }}</p>
+                <p><strong>Answer:</strong> {{ flashcard.answer }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger" @click="deleteFlashcard" :disabled="deleting">
+              <span v-if="deleting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <i v-else class="bi bi-trash me-1"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import api from '../services/api';
+import { Modal } from 'bootstrap';
 
 export default {
   name: 'FlashcardFormView',
@@ -72,7 +115,9 @@ export default {
         hint: ''
       },
       loading: true,
-      saving: false
+      saving: false,
+      deleting: false,
+      deleteModal: null
     }
   },
   computed: {
@@ -86,15 +131,14 @@ export default {
     }
     this.loading = false;
   },
+  mounted() {
+    this.deleteModal = new Modal(this.$refs.deleteModal);
+  },
   methods: {
     async loadFlashcard() {
       try {
         const response = await api.getFlashcard(this.id);
-        this.flashcard = {
-          question: response.data.question,
-          answer: response.data.answer,
-          hint: response.data.hint || ''
-        };
+        this.flashcard = response.data;
       } catch (error) {
         console.error('Error loading flashcard:', error);
       }
@@ -104,7 +148,13 @@ export default {
         this.saving = true;
         
         if (this.isEditing) {
-          await api.updateFlashcard(this.id, this.flashcard);
+          // Only update the fields we want to change
+          const updatedFields = {
+            question: this.flashcard.question,
+            answer: this.flashcard.answer,
+            hint: this.flashcard.hint || ''
+          };
+          await api.updateFlashcard(this.id, updatedFields);
         } else {
           await api.createFlashcard(this.flashcard);
         }
@@ -114,7 +164,32 @@ export default {
         console.error('Error saving flashcard:', error);
         this.saving = false;
       }
+    },
+    confirmDelete() {
+      this.deleteModal.show();
+    },
+    async deleteFlashcard() {
+      try {
+        this.deleting = true;
+        await api.deleteFlashcard(this.id);
+        this.deleteModal.hide();
+        this.$router.push('/flashcards');
+      } catch (error) {
+        console.error('Error deleting flashcard:', error);
+        this.deleting = false;
+      }
     }
   }
 }
 </script>
+
+<style scoped>
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
+}
+
+textarea {
+  resize: vertical;
+}
+</style>

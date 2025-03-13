@@ -3,7 +3,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>All Flashcards</h1>
       <router-link to="/flashcards/new" class="btn btn-success">
-        <i class="bi bi-plus-circle"></i> Create New Flashcard
+        <i class="bi bi-plus-circle me-1"></i> Create New Flashcard
       </router-link>
     </div>
     
@@ -17,7 +17,7 @@
           @input="filterFlashcards"
         >
         <button class="btn btn-outline-secondary" type="button" @click="filterFlashcards">
-          <i class="bi bi-search"></i>
+          <i class="bi bi-search me-1"></i> Search
         </button>
       </div>
     </div>
@@ -39,22 +39,13 @@
             <span class="badge bg-primary">
               {{ formatDate(flashcard.nextReviewAt) }}
             </span>
-            <div class="dropdown">
-              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-three-dots-vertical"></i>
+            <div>
+              <router-link :to="`/flashcards/${flashcard.id}`" class="btn btn-sm btn-outline-primary me-1">
+                <i class="bi bi-pencil me-1"></i> Edit
+              </router-link>
+              <button class="btn btn-sm btn-outline-danger" @click="confirmDelete(flashcard)">
+                <i class="bi bi-trash me-1"></i> Delete
               </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <router-link :to="`/flashcards/${flashcard.id}`" class="dropdown-item">
-                    Edit
-                  </router-link>
-                </li>
-                <li>
-                  <button class="dropdown-item text-danger" @click="confirmDelete(flashcard)">
-                    Delete
-                  </button>
-                </li>
-              </ul>
             </div>
           </div>
           <div class="card-body">
@@ -70,6 +61,10 @@
                 <strong>Hint:</strong> {{ flashcard.hint }}
               </div>
             </div>
+          </div>
+          <div class="card-footer d-flex justify-content-between">
+            <small class="text-muted">Created: {{ formatDate(flashcard.createdAt) }}</small>
+            <small class="text-muted">Last reviewed: {{ formatDate(flashcard.lastReviewedAt) }}</small>
           </div>
         </div>
       </div>
@@ -189,3 +184,14 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+</style>
