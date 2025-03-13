@@ -99,7 +99,7 @@
           <div class="modal-footer">
             <router-link to="/" class="btn btn-primary">Return Home</router-link>
             <button type="button" class="btn btn-success" @click="restartSession">
-              Study More
+              Study Again
             </button>
           </div>
         </div>
@@ -116,11 +116,11 @@ export default {
   name: 'StudyView',
   data() {
     return {
-      loading: true,
       dueFlashcards: [],
       currentIndex: 0,
       showAnswer: false,
       showHint: false,
+      loading: true,
       completeModal: null
     }
   },
@@ -142,6 +142,8 @@ export default {
         const response = await api.getDueFlashcards();
         this.dueFlashcards = response.data;
         this.currentIndex = 0;
+        this.showAnswer = false;
+        this.showHint = false;
         this.loading = false;
       } catch (error) {
         console.error('Error loading due flashcards:', error);
@@ -153,16 +155,18 @@ export default {
     },
     async rateFlashcard(quality) {
       try {
-        // Submit the rating to the API
+        if (!this.currentFlashcard) return;
+        
+        // Send the review to the API
         await api.reviewFlashcard(this.currentFlashcard.id, quality);
         
-        // Move to the next card
-        this.currentIndex++;
-        this.showAnswer = false;
-        this.showHint = false;
-        
-        // Check if we've completed all cards
-        if (this.currentIndex >= this.dueFlashcards.length) {
+        // Move to the next card or finish
+        if (this.currentIndex < this.dueFlashcards.length - 1) {
+          this.currentIndex++;
+          this.showAnswer = false;
+          this.showHint = false;
+        } else {
+          // Show completion modal
           this.completeModal.show();
         }
       } catch (error) {
@@ -170,17 +174,18 @@ export default {
       }
     },
     getQualityButtonClass(quality) {
-      if (quality <= 1) return 'btn-danger';
-      if (quality <= 3) return 'btn-warning';
-      return 'btn-success';
+      const baseClass = 'btn-sm';
+      if (quality <= 1) return `${baseClass} btn-danger`;
+      if (quality <= 3) return `${baseClass} btn-warning`;
+      return `${baseClass} btn-success`;
     },
     getQualityLabel(quality) {
       switch (quality) {
-        case 0: return 'Complete Blackout';
-        case 1: return 'Incorrect';
-        case 2: return 'Incorrect (Easy)';
-        case 3: return 'Correct (Hard)';
-        case 4: return 'Correct';
+        case 0: return 'Blackout';
+        case 1: return 'Wrong';
+        case 2: return 'Difficult';
+        case 3: return 'Hard';
+        case 4: return 'Good';
         case 5: return 'Perfect';
         default: return '';
       }
@@ -188,7 +193,47 @@ export default {
     restartSession() {
       this.completeModal.hide();
       this.loadDueFlashcards();
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
     }
   }
 }
 </script>
+
+<style scoped>
+.flashcard {
+  perspective: 1000px;
+  height: 200px;
+  margin: 20px 0;
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 20px;
+}
+
+.flashcard-back {
+  transform: rotateY(180deg);
+}
+</style>
