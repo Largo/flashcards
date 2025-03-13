@@ -1,116 +1,105 @@
 <template>
-  <div class="home-view">
-    <div class="jumbotron bg-light p-5 rounded mb-4">
-      <h1 class="display-4">Welcome to Flashcard App</h1>
-      <p class="lead">
-        A spaced repetition system to help you memorize and retain information more effectively.
-      </p>
-      <hr class="my-4">
-      <p>
-        Get started by creating flashcards and studying them using the scientifically-proven spaced repetition algorithm.
-      </p>
-      <div class="d-flex gap-2">
-        <router-link to="/flashcards" class="btn btn-primary">
-          View All Flashcards
-        </router-link>
-        <router-link to="/study" class="btn btn-success">
-          Start Studying
-        </router-link>
+  <div class="home">
+    <div class="jumbotron bg-light p-5 rounded-3 mb-4">
+      <div class="container">
+        <h1 class="display-4">Welcome to Flashcards App</h1>
+        <p class="lead">An efficient way to learn and remember anything with spaced repetition.</p>
+        
+        <div v-if="!isAuthenticated" class="mt-4">
+          <router-link to="/register" class="btn btn-primary btn-lg me-2">Get Started</router-link>
+          <router-link to="/login" class="btn btn-outline-primary btn-lg">Login</router-link>
+        </div>
+        <div v-else class="mt-4">
+          <router-link to="/flashcards" class="btn btn-primary btn-lg me-2">My Flashcards</router-link>
+          <router-link to="/study" class="btn btn-success btn-lg">Start Studying</router-link>
+        </div>
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-6 mb-4">
+    <div class="row mb-4">
+      <div class="col-md-4">
         <div class="card h-100">
           <div class="card-body">
-            <h5 class="card-title">
-              <i class="bi bi-card-list me-2"></i>Flashcards
-            </h5>
-            <p class="card-text">
-              Create and manage your flashcards. Add questions, answers, and hints to help you study.
-            </p>
-            <div class="d-flex justify-content-between align-items-center">
-              <router-link to="/flashcards" class="btn btn-outline-primary">
-                Manage Flashcards
-              </router-link>
-              <span class="badge bg-primary rounded-pill">{{ stats.totalFlashcards }}</span>
-            </div>
+            <h5 class="card-title">Create Flashcards</h5>
+            <p class="card-text">Create your own flashcards with questions and answers to help you learn and remember important information.</p>
           </div>
         </div>
       </div>
-
-      <div class="col-md-6 mb-4">
+      <div class="col-md-4">
         <div class="card h-100">
           <div class="card-body">
-            <h5 class="card-title">
-              <i class="bi bi-lightning me-2"></i>Study Session
-            </h5>
-            <p class="card-text">
-              Review flashcards that are due for review based on the spaced repetition algorithm.
-            </p>
-            <div class="d-flex justify-content-between align-items-center">
-              <router-link to="/study" class="btn btn-outline-success">
-                Start Studying
-              </router-link>
-              <span class="badge bg-success rounded-pill">{{ stats.dueFlashcards }} due</span>
-            </div>
+            <h5 class="card-title">Spaced Repetition</h5>
+            <p class="card-text">Our app uses a scientifically proven spaced repetition algorithm to help you remember information more effectively.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Track Progress</h5>
+            <p class="card-text">Keep track of your learning progress and focus on the cards that need more attention.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card mt-4">
-      <div class="card-header">
-        <h5 class="mb-0">How Spaced Repetition Works</h5>
-      </div>
-      <div class="card-body">
-        <p>
-          This app uses the SM-2 spaced repetition algorithm to optimize your learning:
-        </p>
-        <ol>
-          <li>After reviewing a flashcard, rate your recall quality from 0-5</li>
-          <li>Cards you find difficult will appear more frequently</li>
-          <li>Cards you know well will appear less often</li>
-          <li>The system automatically schedules the optimal time for your next review</li>
-        </ol>
-        <p class="mb-0">
-          This scientifically-proven method helps you focus on what you need to learn most while reinforcing your knowledge at the optimal intervals.
-        </p>
-      </div>
+    <div v-if="isAuthenticated && dueFlashcards > 0" class="alert alert-info">
+      <strong>You have {{ dueFlashcards }} flashcards due for review!</strong>
+      <router-link to="/study" class="btn btn-sm btn-primary ms-3">Review Now</router-link>
     </div>
   </div>
 </template>
 
 <script>
+import auth from '../services/auth';
 import api from '../services/api';
 
 export default {
   name: 'HomeView',
   data() {
     return {
-      stats: {
-        totalFlashcards: 0,
-        dueFlashcards: 0
-      }
+      isAuthenticated: false,
+      dueFlashcards: 0
     }
   },
-  async created() {
-    await this.loadStats();
+  created() {
+    this.isAuthenticated = auth.isAuthenticated();
+    
+    if (this.isAuthenticated) {
+      this.fetchDueFlashcards();
+    }
   },
   methods: {
-    async loadStats() {
+    async fetchDueFlashcards() {
       try {
-        // Get all flashcards to count total
-        const flashcardsResponse = await api.getFlashcards();
-        this.stats.totalFlashcards = flashcardsResponse.data.length;
-        
-        // Get due flashcards
-        const dueFlashcardsResponse = await api.getDueFlashcards();
-        this.stats.dueFlashcards = dueFlashcardsResponse.data.length;
+        const response = await api.getDueFlashcards();
+        this.dueFlashcards = response.data.length;
       } catch (error) {
-        console.error('Error loading stats:', error);
+        console.error('Error fetching due flashcards:', error);
       }
     }
   }
 }
 </script>
+
+<style scoped>
+.home {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.jumbotron {
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.card {
+  transition: transform 0.3s;
+  border-radius: 0.5rem;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+</style>

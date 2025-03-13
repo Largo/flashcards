@@ -28,7 +28,7 @@ bld/
 *.publishsettings
 
 # Entity Framework Core
-Migrations/
+#Migrations/
 *.db
 *.db-shm
 *.db-wal

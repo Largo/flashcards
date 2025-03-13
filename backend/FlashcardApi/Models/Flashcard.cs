@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FlashcardApi.Models
 {
@@ -15,6 +17,13 @@ namespace FlashcardApi.Models
         public string Answer { get; set; }
         
         public string? Hint { get; set; }
+        
+        // User relationship
+        public int? UserId { get; set; }
+        
+        [ForeignKey("UserId")]
+        [JsonIgnore]
+        public virtual User? User { get; set; }
         
         // Spaced Repetition Algorithm properties
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
